@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>패션 갤러리</title>
+    <script src="js/jquery-3.5.0.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/jquery.rotate.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background-color: #f2f2f2;
+            /* overflow: hidden;*/
+        }
+
+        .hid {
+            display: none;
+        }
+
+        .title {
+            width: 400px;
+            font: bold, 3.2rem;
+            text-align: center;
+            color: #2f2f2f;
+            margin: 0 auto;
+            margin-top: 100px;
+        }
+
+        #gallery {
+            width: 980px;
+            margin: 0 auto;
+            margin-top: 50px;
+            margin-bottom: 100px;
+            overflow: hidden;
+            border-top: 2px solid #2f2f2f;
+        }
+        
+        .track {
+            position: relative;
+            width: calc(100% / 3);
+            margin: 0;
+            float: left;
+        }
+
+        .photobox {
+            position: relative;
+            width: 95%;
+            margin: 5% auto;
+            cursor: pointer;
+            margin: 5px;
+            float: left;
+            overflow: hidden;
+        }
+
+        .photobox img {
+            width: 100%;
+            height: 100%;
+        }
+
+        /*.cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f2f2f2;
+            opacity: 0;
+            transition: .5s;
+        }
+
+        .photobox:hover .cover {
+            opacity: .3;
+        }*/
+
+        .text {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            color: #f2f2f2;
+            font-size: 0.68rem;
+            line-height: 4.68rem;
+            text-align: center;
+            white-space: nowrap;
+            background-color: rgba(47, 47, 47, 0.55);
+            transition: .5s;
+        }
+
+        #dp-btns {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(242, 242, 242, 0.85);
+            display: none;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 82px;
+            right: 36px;
+            width: 40px;
+            height: 39px;
+            background-image: url(images/mv_btns.png);
+            background-repeat: no-repeat;
+            background-position: -129px -342px;
+        }
+
+        .btns {
+            position: absolute;
+            width: 56px;
+            height: 111px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-image: url(images/mv_btns.png);
+            background-repeat: no-repeat;
+        }
+
+        .btn-left {
+            left: 36px;
+            background-position: -232px 0;
+        }
+
+        .btn-left:hover {
+            left: 36px;
+            background-position: 0 -221px;
+        }
+
+        .btn-right {
+            right: 36px;
+            background-position: 0 -100px;
+        }
+
+        .btn-right:hover {
+            right: 36px;
+            background-position: -167px 0;
+        }
+
+        #dp-img {
+            position: fixed;
+            height: 70%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        #dp-img img {
+            height: 100%;
+        }
+    </style>
+    <script>
+        var imgText = [],
+            boxIndex = 0
+
+        for (var i = 0; i < 50; i++) {
+            imgText[i] = "스타일" + (i+1)
+        }
+        /*-----load-----*/
+        window.addEventListener("load", function() {
+            console.log("loaded")
+            var count = 50,
+                trackNum = 0,
+                $gallery = $('#gallery')
+
+            for (var i = 0; i < count; i++) {
+                var photoboxTag = '<div class="photobox">' +
+                    '   <img src="flexImg/' + (i + 1) + '.jpg" alt="img' + (i + 1) + '">' +
+                    '   <span class="cover"></span>' +
+                    '   <span class="text">' + imgText[i] + '</span>' +
+                    '</div>'
+                $gallery.find('.track').eq(trackNum).append(photoboxTag)
+                trackNum++
+                if(trackNum>=$gallery.find('.track').length){
+                    trackNum = 0
+                }
+            }
+
+            var $photobox = $('.photobox'),
+                $dpBtns = $('#dp-btns'),
+                $dpImg = $('#dp-img'),
+                $btnClose = $('.btn-close'),
+                $btns = $('.btns'),
+                boxLength = $photobox.length
+
+            $photobox.click(function(e) {
+                boxIndex = $(this).index()
+                $dpBtns.fadeIn(300)
+                showImg($(this))
+            })
+
+            $btnClose.click(function() {
+                $dpBtns.fadeOut(300)
+                $dpImg.fadeOut(300).find('img,h4').remove()
+            })
+
+            $btnClose.hover(function(e) {
+                e.preventDefault()
+                $(this).stop().animate({
+                    rotate: "-180deg"
+                }, 200)
+            }, function() {
+                $(this).stop().animate({
+                    rotate: "0deg"
+                }, 200)
+            })
+
+            $btns.click(function(e) {
+                e.preventDefault()
+                if ($(this).hasClass('btn-left')) {
+                    boxIndex--
+                    if (boxIndex < 0) {
+                        boxIndex = boxLength - 1
+                    }
+                } else if ($(this).hasClass('btn-right')) {
+                    boxIndex++
+                    if (boxIndex >= boxLength) {
+                        boxIndex = 0
+                    }
+                }
+                showImg($photobox.eq(boxIndex))
+            })
+        }) /*-----load-----*/
+
+        function showImg(element) {
+            var $dpImg = $('#dp-img')
+            var img_src = element.find('img').attr('src'),
+                img_text = element.find('.text').text()
+            $dpImg.html('<img src="' + img_src + '" alt="' + img_src + '">' + '<h4>' + img_text + '</h4>').fadeIn(300)
+        }
+    </script>
+</head>
+
+<body>
+    <h1 class='title'>패숀 갤러리</h1>
+    <div id='gallery'>
+        <!--<div class='photobox'>
+            <img src="images/mob/1.jpg" alt="">
+            <span class='cover'></span>
+            <span class='text'>나랏말싸미 듕귁에 달아 문종와 서로 사맛디 아니할세</span>
+        </div>-->
+        <div class="track track-1"></div>
+        <div class="track track-2"></div>
+        <div class="track track-3"></div>
+    </div>
+    <div id='dp-btns'>
+        <a href="#" class='btn-close'><span class="hid">닫기</span></a>
+        <a href="#" class='btn-left btns'><span class="hid">좌</span></a>
+        <a href="#" class='btn-right btns'><span class="hid">우</span></a>
+    </div>
+    <div id='dp-img'>
+        <!--<img src="images/1.jpg" alt="">-->
+    </div>
+</body></html>
